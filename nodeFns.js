@@ -1,6 +1,5 @@
 const md5 = require('md5');
-
-const checkPassword  =  (password) => {
+module.exports.checkPassword = checkPassword = async (app, db, password) => {
     password = md5(password);
     let sql = "SELECT COUNT(*) AS rows FROM `accounts` WHERE `password` = ?";
     db.connect(() => {
@@ -18,7 +17,5 @@ const checkPassword  =  (password) => {
                 return false;
             }
         })
-    })
-}
-
-module.exports.checkPassword = checkPassword;
+    });
+};

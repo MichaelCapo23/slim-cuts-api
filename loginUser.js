@@ -1,44 +1,5 @@
+const wrap = require("./wrap");
 const md5 = require('md5');
-
-module.exports = (app, db) => {
-    app.post('/loginUser', (req, res) => {
-        req.body.password = md5(req.body.password);
-        let {email, password} = req.body;
-        // let {email, password} = req.body;
-        // checkPassword(app, db, password).then(newPassword => {
-        //     console.log('newPassword2:' + newPassword);
-        //     if (!newPassword) {
-        //         let output = {
-        //             status: 'NO',
-        //             errMessage: 'Invalid Username/Password',
-        //         };
-        //         res.send(output);
-        //         return;
-
-
-        let sql = "SELECT `token` FROM `accounts` WHERE `email` = ? AND `password` = ?";
-        db.connect(() => {
-            db.query(sql, [email, password], (err, data) => {
-                if(!err) {
-                    let output = {
-                        status: "NO",
-                        errMessage: 'Invalid Username/Password'
-                    };
-                    if(data.length > 0) {
-                        output = {
-                            status: "OK",
-                            token: data[0].token
-                        };
-                    }
-                    res.send(output);
-                } else {
-                    console.log(err);
-                }
-            })
-        })
-    })
-};
-
 
 const checkPassword = async (app, db, password) => {
     password = md5(password);
@@ -60,3 +21,55 @@ const checkPassword = async (app, db, password) => {
         })
     })
 }
+
+module.exports = (app, db) => {
+    app.post('/loginUser', wrap(async (req, res) => {
+        req.body.password = md5(req.body.password);
+        let {email, password} = req.body;
+        let newPassword = await checkPassword(app, db, password);
+        console.log('newPassword2:' + newPassword);
+        if (!newPassword) {
+            let output = {
+                status: 'NO',
+                errMessage: 'Invalid Username/Password',
+            };
+            res.send(output);
+            return;
+        }
+
+        //// routes/video.js
+        // const wrap = require("../middleware/wrap");
+        // router.get("/", wrap(async (req, res, next) => {
+        //   let videos = await media.getAll({
+        //     lang: req.getLocale(),
+        //     type: 1
+        //   });
+        //
+        //   res.render("videos", {
+        //     videos
+        //   });
+        // }));
+
+        let sql = "SELECT `token` FROM `accounts` WHERE `email` = ? AND `password` = ?";
+        db.connect(() => {
+            db.query(sql, [email, password], (err, data) => {
+                if (!err) {
+                    let output = {
+                        status: "NO",
+                        errMessage: 'Invalid Username/Password'
+                    };
+                    if (data.length > 0) {
+                        output = {
+                            status: "OK",
+                            token: data[0].token
+                        };
+                    }
+                    res.send(output);
+                } else {
+                    console.log(err);
+                }
+            })
+        });
+    }));
+}
+
