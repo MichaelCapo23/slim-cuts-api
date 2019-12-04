@@ -6,6 +6,7 @@ const mysql = require('mysql');
 const db = mysql.createConnection(mysql_creds);
 const cors = require('cors');
 const bodyParser = require('body-parser');
+require('express-async-await')(app);
 const port = process.env.PORT || 5000;
 
 
@@ -32,12 +33,6 @@ app.get('/express_backend', (req, res) => {
 require('./addAccount')(app, db);
 require('./loginUser')(app, db);
 require('./getUsername')(app, db);
-
-
-
-
-
-
 
 // app.post('/addAccount', (req, res) => {
 //     let {name, password, email, username} = req.body;
